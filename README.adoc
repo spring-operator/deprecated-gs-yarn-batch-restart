@@ -1,0 +1,194 @@
+---
+tags: [hadoop,yarn,boot,batch]
+projects: [spring-hadoop]
+---
+:spring_version: 4.0.2.RELEASE
+:spring_boot_version: 1.0.0.RC5
+:spring_hadoop_version: 2.0.0.RC1
+:java_version: 1.6
+:Component: http://docs.spring.io/spring/docs/{spring_version}/javadoc-api/org/springframework/stereotype/Component.html
+:SpringComponentScanAnnotation: http://docs.spring.io/spring/docs/{spring_version}/javadoc-api/org/springframework/context/annotation/ComponentScan.html
+:SpringConfigurationAnnotation: http://docs.spring.io/spring/docs/{spring_version}/javadoc-api/org/springframework/context/annotation/Configuration.html
+:SpringBeanAnnotation: http://docs.spring.io/spring/docs/{spring_version}/javadoc-api/org/springframework/context/annotation/Bean.html
+:SpringApplication: http://docs.spring.io/spring-boot/docs/{spring_boot_version}/api/org/springframework/boot/SpringApplication.html
+:ConfigurationProperties: http://docs.spring.io/spring-boot/docs/{spring_boot_version}/api/org/springframework/boot/context/properties/ConfigurationProperties.html
+:EnableAutoConfiguration: http://docs.spring.io/spring-boot/docs/{spring_boot_version}/api/org/springframework/boot/autoconfigure/EnableAutoConfiguration.html
+:YarnClient: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/yarn/client/YarnClient.html
+:YarnAppmaster: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/yarn/am/YarnAppmaster.html
+:YarnContainer: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/yarn/container/YarnContainer.html
+:YarnContainerAnnotation: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/yarn/annotation/YarnContainer.html
+:OnYarnContainerStartAnnotation: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/yarn/annotation/OnYarnContainerStart.html
+:SpringYarnBootApplication: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/yarn/boot/app/SpringYarnBootApplication.html
+:DefaultYarnContainer: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/yarn/container/DefaultYarnContainer.html
+:FsShell: http://docs.spring.io/spring-hadoop/docs/{spring_hadoop_version}/api/org/springframework/data/hadoop/fs/FsShell.html
+:toc:
+:icons: font
+:source-highlighter: prettify
+:project_id: gs-yarn-batch-restart
+:yarn_base_appmaster: gs-yarn-batch-restart-appmaster
+:yarn_base_container: gs-yarn-batch-restart-container
+:yarn_base_client: gs-yarn-batch-restart-client
+This guide walks you through the process of executing a Spring Batch
+job and its partitioned steps on Hadoop YARN in a way of simulating an
+error in a partitioned step and restart of a job.
+
+== What you'll build
+
+You'll build a simple Hadoop YARN application with Spring Hadoop and
+Spring Boot. This application contains a job with two master steps
+where actual execution is done on YARN as partitioned steps. We also
+simulate an error of step execution order to demonstrate a job restart
+so that step execution is continued from failed steps.
+
+== What you'll need
+
+ - About 15 minutes
+ - A favorite text editor or IDE
+ - http://www.oracle.com/technetwork/java/javase/downloads/index.html[JDK {java_version}] or later
+ - http://www.gradle.org/downloads[Gradle 1.8+]
+ - Cluster or local single-node instance based on Hadoop 2.2.0 or later
+ - Database for persisting batch jobs
+ - You can also import the code from this guide as well as view the web page directly into link:/guides/gs/sts[Spring Tool Suite (STS)] and work your way through it from there.
+
+include::https://raw.github.com/spring-guides/getting-started-macros/master/how_to_complete_this_guide.adoc[]
+
+[[scratch]]
+== Set up the project
+
+First you set up a basic build script. You can use any build system you like when building apps with Spring, but the code you need to work with http://gradle.org[Gradle] is included here. If you're not familiar with it, refer to link:/guides/gs/gradle[Building Java Projects with Gradle].
+
+include::https://raw.github.com/spring-guides/getting-started-macros/master/create_directory_structure_yarn_test_hello.adoc[]
+
+=== Create a Gradle build file
+Below is the https://github.com/spring-guides/{project_id}/blob/master/initial/build.gradle[initial Gradle build file]. If you are using link:/guides/gs/sts[Spring Tool Suite (STS)], you can import the guide directly.
+
+`build.gradle`
+[source,java]
+----
+include::complete/build.gradle[]
+----
+
+In above gradle build file we simply create three different jars, each having classes for its specific role. These jars are then repackaged by Spring Boot's gradle plugin to create an executable jars.
+
+[[initial]]
+== Create a Remote Batch Step
+
+Here you create a `HdfsTasklet` class.
+
+`gs-yarn-batch-restart-container/src/main/java/hello/container/HdfsTasklet.java`
+[source,java]
+----
+include::complete/gs-yarn-batch-restart-container/src/main/java/hello/container/HdfsTasklet.java[]
+----
+
+- We `@AutoWired` Hadoop's `Configuration` to be able to use
+  `FsShell`.
+- We simply check if a file exists in HDFS and throw
+  `RuntimeException` if file doesn't exist. This is done to simulate
+  error in a `Tasklet`. If file does exist we simply return `FINISHED`
+  from a `Tasklet`.
+- To figure out which file name to use we access stepname which looks
+  something like `remoteStep1:partition0` and remove illegal
+  characters.
+
+Here you create a `ContainerApplication` class.
+
+`gs-yarn-batch-restart-container/src/main/java/hello/container/ContainerApplication.java`
+[source,java]
+----
+include::complete/gs-yarn-batch-restart-container/src/main/java/hello/container/ContainerApplication.java[]
+----
+
+- We simply create two steps named `remoteStep1` and `remoteStep2` and
+  attach `HdfsTasklet` to those steps.
+
+== Create a Batch Job
+
+Here you create a `AppmasterApplication` class.
+
+`gs-yarn-batch-restart-appmaster/src/main/java/hello/appmaster/AppmasterApplication.java`
+[source,java]
+----
+include::complete/gs-yarn-batch-restart-appmaster/src/main/java/hello/appmaster/AppmasterApplication.java[]
+----
+
+- We simply create two master steps named `master1` and `master2`.
+  Instruct those steps to be partitioned on YARN and set grid size to
+  two.
+
+== Create a Yarn Client
+
+Here you create a `ClientApplication` class.
+
+`gs-yarn-batch-restart-client/src/main/java/hello/client/ClientApplication.java`
+[source,java]
+----
+include::complete/gs-yarn-batch-restart-client/src/main/java/hello/client/ClientApplication.java[]
+----
+
+ - {EnableAutoConfiguration}[`@EnableAutoConfiguration`] tells Spring Boot to start adding beans based on classpath setting, other beans, and various property settings.
+ - Specific auto-configuration for Spring YARN components takes place in a same way than from a core Spring Boot.
+
+The `main()` method uses Spring Boot's `SpringApplication.run()` method to launch an application. From there we simply request a bean of type {YarnClient}[`YarnClient`] and execute its `submitApplication()` method. What happens next depends on application configuration, which we go through later in this guide. Did you notice that there wasn't a single line of XML?
+
+== Run the Application
+
+Now that you’ve successfully compiled and packaged your application,
+it’s time to do the fun part and execute it on a Hadoop YARN.
+
+Because we need to persist a Spring Batch job status a database is
+needed. We've bundled an instance of `HSQL` which is easy to start
+as a in-memory mode:
+```
+$ cd db/
+$ unzip hsqldb-2.3.1.zip 
+$ cd hsqldb-2.3.1/hsqldb/data/
+$ java -cp ../lib/hsqldb.jar org.hsqldb.server.Server --database.0
+mem:testdb --dbname.0 testdb --silent false --trace true
+```
+
+First create two empty files `/tmp/remoteStep1partition0` and `/tmp/remoteStep1partition1`
+in HDFS:
+```
+$ hdfs dfs -touch /tmp/remoteStep1partition0
+$ hdfs dfs -touch /tmp/remoteStep1partition1
+```
+Then run the application:
+```
+$ java -jar build/libs/gs-yarn-batch-restart-client-0.1.0.jar
+```
+If you for example check the application status from a YARN resource
+manager, you'll see that application FAILED because partitioned steps
+on a second phase failed. Now create files `/tmp/remoteStep2partition0`
+and `/tmp/remoteStep2partition1`:
+
+```
+$ hdfs dfs -touch /tmp/remoteStep2partition0
+$ hdfs dfs -touch /tmp/remoteStep2partition1
+```
+Runt the application again:
+```
+$ java -jar build/libs/gs-yarn-batch-restart-client-0.1.0.jar
+```
+You should be able to see that application finished successfully and
+only failed partitioned steps were executed.
+
+== Test the Application
+
+Below is a class which can be used to execute this application as a
+JUnit test without running Hadoop cluster.
+
+`src/test/java/hello/AppTests.java`
+[source,java]
+----
+include::complete/src/test/java/hello/AppTests.java[]
+----
+
+Running the JUnit test doesn't require existing database instance
+because as seen from a above example, a `HSQL` instance is created
+within a test itself.
+
+== Summary
+
+Congratulations! You've just developed a Spring YARN application! 
+

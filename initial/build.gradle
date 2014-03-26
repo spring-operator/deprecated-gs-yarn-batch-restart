@@ -1,0 +1,66 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.0.0.RC5")
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+    version =  '0.1.0'
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.spring.io/libs-milestone" }
+    }
+}
+
+subprojects { subproject ->
+    apply plugin: 'spring-boot'
+    dependencies {
+        compile("org.springframework.data:spring-yarn-boot:2.0.0.RC1")
+        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC1")
+    }
+    task copyJars(type: Copy) {
+        from "$buildDir/libs"
+        into "$rootDir/build/libs"
+        include "**/*.jar"
+    }
+    assemble.doLast {copyJars.execute()}
+}
+
+configure(rootProject) {
+    dependencies {
+        compile project(":gs-yarn-batch-restart-client")
+        compile project(":gs-yarn-batch-restart-appmaster")
+        compile project(":gs-yarn-batch-restart-container")
+        testCompile("org.hsqldb:hsqldb:2.3.1")
+        testCompile("org.springframework.data:spring-yarn-boot-test:2.0.0.RC1")
+        testCompile("org.hamcrest:hamcrest-core:1.2.1")
+        testCompile("org.hamcrest:hamcrest-library:1.2.1")
+    }
+    test.dependsOn(':gs-yarn-batch-restart-client:assemble')
+    test.dependsOn(':gs-yarn-batch-restart-appmaster:assemble')
+    test.dependsOn(':gs-yarn-batch-restart-container:assemble')
+    clean.doLast {ant.delete(dir: "target")}
+}
+
+project('gs-yarn-batch-restart-client') {
+}
+
+project('gs-yarn-batch-restart-appmaster') {
+    dependencies {
+        runtime("org.hsqldb:hsqldb:2.3.1")
+        runtime("commons-dbcp:commons-dbcp:1.2.2")
+    }
+}
+
+project('gs-yarn-batch-restart-container') {
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+}
