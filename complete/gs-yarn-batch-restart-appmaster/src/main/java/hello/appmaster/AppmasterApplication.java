@@ -31,10 +31,10 @@ public class AppmasterApplication {
 	@Bean
 	public Job job() throws Exception {
 		return jobFactory.get("job")
-				.incrementer(jobParametersIncrementer())
-				.start(master1())
-				.next(master2())
-				.build();
+			.incrementer(jobParametersIncrementer())
+			.start(master1())
+			.next(master2())
+			.build();
 	}
 
 	@Bean
@@ -45,17 +45,17 @@ public class AppmasterApplication {
 	@Bean
 	protected Step master1() throws Exception {
 		return stepFactory.get("master1")
-				.partitioner("remoteStep1", partitioner())
-				.partitionHandler(partitionHandler1())
-				.build();
+			.partitioner("remoteStep1", partitioner())
+			.partitionHandler(partitionHandler1())
+			.build();
 	}
 
 	@Bean
 	protected Step master2() throws Exception {
 		return stepFactory.get("master2")
-				.partitioner("remoteStep2", partitioner())
-				.partitionHandler(partitionHandler2())
-				.build();
+			.partitioner("remoteStep2", partitioner())
+			.partitionHandler(partitionHandler2())
+			.build();
 	}
 
 	@Bean
