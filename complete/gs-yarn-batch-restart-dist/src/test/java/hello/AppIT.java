@@ -24,19 +24,15 @@ import org.springframework.yarn.test.junit.ApplicationInfo;
 import org.springframework.yarn.test.support.ContainerLogUtils;
 
 @MiniYarnClusterTest
-public class AppTests extends AbstractBootYarnClusterTests {
+public class AppIT extends AbstractBootYarnClusterTests {
 
 	@Test
 	public void testApp() throws Exception {
 		FsShell shell = new FsShell(getConfiguration());
-		String[] args = new String[] {
-				"--spring.yarn.client.files[0]=file:build/libs/gs-yarn-batch-restart-appmaster-0.1.0.jar",
-				"--spring.yarn.client.files[1]=file:build/libs/gs-yarn-batch-restart-container-0.1.0.jar" };
-
 		shell.touchz("/tmp/remoteStep1partition0");
 		shell.touchz("/tmp/remoteStep1partition1");
 
-		ApplicationInfo info1 = submitApplicationAndWait(ClientApplication.class, args, 2, TimeUnit.MINUTES);
+		ApplicationInfo info1 = submitApplicationAndWait(ClientApplication.class, new String[0], 2, TimeUnit.MINUTES);
 		assertThat(info1.getYarnApplicationState(), is(YarnApplicationState.FINISHED));
 		assertLogs(ContainerLogUtils.queryContainerLogs(getYarnCluster(), info1.getApplicationId()), 10, 2, 2);
 
@@ -44,7 +40,7 @@ public class AppTests extends AbstractBootYarnClusterTests {
 		shell.touchz("/tmp/remoteStep2partition1");
 		shell.close();
 
-		ApplicationInfo info2 = submitApplicationAndWait(ClientApplication.class, args, 2, TimeUnit.MINUTES);
+		ApplicationInfo info2 = submitApplicationAndWait(ClientApplication.class, new String[0], 2, TimeUnit.MINUTES);
 		assertThat(info2.getYarnApplicationState(), is(YarnApplicationState.FINISHED));
 		assertLogs(ContainerLogUtils.queryContainerLogs(getYarnCluster(), info2.getApplicationId()), 6, 2, 0);
 	}

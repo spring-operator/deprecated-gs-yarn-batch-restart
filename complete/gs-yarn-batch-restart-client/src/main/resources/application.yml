@@ -23,8 +23,8 @@ spring:
         applicationDir: /app/batch-restart-db-boot/
         client:
             files:
-              - "file:build/libs/gs-yarn-batch-restart-container-0.1.0.jar"
-              - "file:build/libs/gs-yarn-batch-restart-appmaster-0.1.0.jar"
+              - "file:target/gs-yarn-batch-restart-dist/gs-yarn-batch-restart-container-0.1.0.jar"
+              - "file:target/gs-yarn-batch-restart-dist/gs-yarn-batch-restart-appmaster-0.1.0.jar"
             launchcontext:
                 archiveFile: gs-yarn-batch-restart-appmaster-0.1.0.jar
         appmaster:

@@ -28,6 +28,7 @@ projects: [spring-hadoop]
 :yarn_base_appmaster: gs-yarn-batch-restart-appmaster
 :yarn_base_container: gs-yarn-batch-restart-container
 :yarn_base_client: gs-yarn-batch-restart-client
+:yarn_base_dist: gs-yarn-batch-restart-dist
 This guide walks you through the process of executing a Spring Batch
 job and its partitioned steps on Hadoop YARN in a way of simulating an
 error in a partitioned step and restart of a job.
@@ -42,13 +43,10 @@ so that step execution is continued from failed steps.
 
 == What you'll need
 
- - About 15 minutes
- - A favorite text editor or IDE
- - http://www.oracle.com/technetwork/java/javase/downloads/index.html[JDK {java_version}] or later
- - http://www.gradle.org/downloads[Gradle 1.8+]
- - Cluster or local single-node instance based on Hadoop 2.2.0 or later
- - Database for persisting batch jobs
- - You can also import the code from this guide as well as view the web page directly into link:/guides/gs/sts[Spring Tool Suite (STS)] and work your way through it from there.
+include::https://raw.github.com/spring-guides/getting-started-macros/master/prereq_editor_jdk_buildtools.adoc[]
+ - Local single-node instance based on Hadoop 2.2.0 or later
+
+NOTE: Testing this sample application don't need existing or running Hadoop instance.
 
 include::https://raw.github.com/spring-guides/getting-started-macros/master/how_to_complete_this_guide.adoc[]
 
@@ -131,6 +129,8 @@ include::complete/gs-yarn-batch-restart-client/src/main/java/hello/client/Client
 
 The `main()` method uses Spring Boot's `SpringApplication.run()` method to launch an application. From there we simply request a bean of type {YarnClient}[`YarnClient`] and execute its `submitApplication()` method. What happens next depends on application configuration, which we go through later in this guide. Did you notice that there wasn't a single line of XML?
 
+include::https://raw.github.com/spring-guides/getting-started-macros/master/build_yarn_application.adoc[]
+
 == Run the Application
 
 Now that you’ve successfully compiled and packaged your application,
@@ -155,7 +155,8 @@ $ hdfs dfs -touch /tmp/remoteStep1partition1
 ```
 Then run the application:
 ```
-$ java -jar build/libs/gs-yarn-batch-restart-client-0.1.0.jar
+$ cd gs-yarn-batch-restart-dist
+$ java -jar target/gs-yarn-batch-restart-dist/gs-yarn-batch-restart-client-0.1.0.jar
 ```
 If you for example check the application status from a YARN resource
 manager, you'll see that application FAILED because partitioned steps
@@ -168,7 +169,7 @@ $ hdfs dfs -touch /tmp/remoteStep2partition1
 ```
 Runt the application again:
 ```
-$ java -jar build/libs/gs-yarn-batch-restart-client-0.1.0.jar
+$ java -jar target/dist/gs-yarn-batch-restart-client-0.1.0.jar
 ```
 You should be able to see that application finished successfully and
 only failed partitioned steps were executed.
@@ -178,10 +179,10 @@ only failed partitioned steps were executed.
 Below is a class which can be used to execute this application as a
 JUnit test without running Hadoop cluster.
 
-`src/test/java/hello/AppTests.java`
+`gs-yarn-batch-restart-dist/src/test/java/hello/AppTests.java`
 [source,java]
 ----
-include::complete/src/test/java/hello/AppTests.java[]
+include::complete/gs-yarn-batch-restart-dist/src/test/java/hello/AppIT.java[]
 ----
 
 Running the JUnit test doesn't require existing database instance

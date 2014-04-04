@@ -8,6 +8,10 @@ buildscript {
 }
 
 allprojects {
+    apply plugin: 'base'
+}
+
+subprojects { subproject ->
     apply plugin: 'java'
     apply plugin: 'eclipse'
     apply plugin: 'idea'
@@ -16,23 +20,44 @@ allprojects {
         mavenCentral()
         maven { url "http://repo.spring.io/libs-milestone" }
     }
-}
-
-subprojects { subproject ->
-    apply plugin: 'spring-boot'
     dependencies {
         compile("org.springframework.data:spring-yarn-boot:2.0.0.RC2")
-        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC2")
     }
     task copyJars(type: Copy) {
         from "$buildDir/libs"
-        into "$rootDir/build/libs"
+        into "$rootDir/gs-yarn-batch-restart-dist/target/gs-yarn-batch-restart-dist/"
         include "**/*.jar"
+    }
+    configurations {
+        compile.exclude group: "org.slf4j", module: "slf4j-log4j12"
+        runtime.exclude group: "org.slf4j", module: "slf4j-log4j12"
     }
     assemble.doLast {copyJars.execute()}
 }
 
-configure(rootProject) {
+project('gs-yarn-batch-restart-client') {
+    apply plugin: 'spring-boot'
+}
+
+project('gs-yarn-batch-restart-appmaster') {
+    apply plugin: 'spring-boot'
+    dependencies {
+        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC2")
+        runtime("org.springframework.boot:spring-boot-starter-batch:1.0.0.RELEASE")
+        runtime("org.hsqldb:hsqldb:2.3.1")
+        runtime("commons-dbcp:commons-dbcp:1.2.2")
+    }
+}
+
+project('gs-yarn-batch-restart-container') {
+    apply plugin: 'spring-boot'
+    dependencies {
+        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC2")
+        runtime("org.springframework.boot:spring-boot-starter-batch:1.0.0.RELEASE")
+    }
+}
+
+project('gs-yarn-batch-restart-dist') {
     dependencies {
         compile project(":gs-yarn-batch-restart-client")
         compile project(":gs-yarn-batch-restart-appmaster")
@@ -46,19 +71,6 @@ configure(rootProject) {
     test.dependsOn(':gs-yarn-batch-restart-appmaster:assemble')
     test.dependsOn(':gs-yarn-batch-restart-container:assemble')
     clean.doLast {ant.delete(dir: "target")}
-}
-
-project('gs-yarn-batch-restart-client') {
-}
-
-project('gs-yarn-batch-restart-appmaster') {
-    dependencies {
-        runtime("org.hsqldb:hsqldb:2.3.1")
-        runtime("commons-dbcp:commons-dbcp:1.2.2")
-    }
-}
-
-project('gs-yarn-batch-restart-container') {
 }
 
 task wrapper(type: Wrapper) {
