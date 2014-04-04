@@ -100,6 +100,19 @@ include::complete/gs-yarn-batch-restart-container/src/main/java/hello/container/
 - We simply create two steps named `remoteStep1` and `remoteStep2` and
   attach `HdfsTasklet` to those steps.
 
+Here you create a `application.yml` file for container.
+
+`gs-yarn-batch-restart-container/src/main/resources/application.yml`
+[source,yaml]
+----
+include::complete/gs-yarn-batch-restart-container/src/main/resources/application.yml[]
+----
+
+- We disable batch functionality in Boot core to use a YARN specific.
+- We could optionally add Hadoop configuration for HDFS.
+- We enable batch processing on YARN by using
+  `spring.yarn.batch.enable` property.
+
 == Create a Batch Job
 
 Here you create a `AppmasterApplication` class.
@@ -113,6 +126,25 @@ include::complete/gs-yarn-batch-restart-appmaster/src/main/java/hello/appmaster/
 - We simply create two master steps named `master1` and `master2`.
   Instruct those steps to be partitioned on YARN and set grid size to
   two.
+
+Here you create a `application.yml` file for appmaster.
+
+`gs-yarn-batch-restart-appmaster/src/main/resources/application.yml`
+[source,yaml]
+----
+include::complete/gs-yarn-batch-restart-appmaster/src/main/resources/application.yml[]
+----
+
+- We disable batch functionality in Boot core to use a YARN specific.
+- We could optionally add Hadoop configuration for HDFS.
+- We enable batch processing on YARN by using
+  `spring.yarn.batch.enable` property.
+- We define a job named `job` to run automatically.
+- We enable a job named `job` and allow it to do a next operation
+  with an indication that job execution should not fail if job
+  parameters cannot be incremented.
+- We enable job restart and with an indication that job should
+  not fail if job cannot be restarted.
 
 == Create a Yarn Client
 
@@ -128,6 +160,17 @@ include::complete/gs-yarn-batch-restart-client/src/main/java/hello/client/Client
  - Specific auto-configuration for Spring YARN components takes place in a same way than from a core Spring Boot.
 
 The `main()` method uses Spring Boot's `SpringApplication.run()` method to launch an application. From there we simply request a bean of type {YarnClient}[`YarnClient`] and execute its `submitApplication()` method. What happens next depends on application configuration, which we go through later in this guide. Did you notice that there wasn't a single line of XML?
+
+Here you create a `application.yml` file for client.
+
+`gs-yarn-batch-restart-client/src/main/resources/application.yml`
+[source,yaml]
+----
+include::complete/gs-yarn-batch-restart-client/src/main/resources/application.yml[]
+----
+
+- Here we simply defined all needed files for the application needed
+  for submission.
 
 include::https://raw.github.com/spring-guides/getting-started-macros/master/build_yarn_application.adoc[]
 

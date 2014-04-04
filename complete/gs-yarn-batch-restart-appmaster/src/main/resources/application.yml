@@ -9,6 +9,8 @@ spring:
         fsUri: hdfs://localhost:8020
         resourceManagerHost: localhost
     yarn:
+        appName: gs-yarn-batch-restart
+        applicationDir: /app/gs-yarn-batch-restart/
         batch:
             enabled: true
             name: job
@@ -19,8 +21,6 @@ spring:
                 failNext: false
                 restart: true
                 failRestart: false
-        appName: batch-restart-db-boot
-        applicationDir: /app/batch-restart-db-boot/
         appmaster:
             keepContextAlive: false
             launchcontext:
