@@ -3,7 +3,7 @@ buildscript {
         maven { url "http://repo.spring.io/libs-milestone" }
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.0.0.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE")
     }
 }
 
@@ -21,7 +21,7 @@ subprojects { subproject ->
         maven { url "http://repo.spring.io/libs-milestone" }
     }
     dependencies {
-        compile("org.springframework.data:spring-yarn-boot:2.0.0.RC2")
+        compile("org.springframework.data:spring-yarn-boot:2.0.0.RC4")
     }
     task copyJars(type: Copy) {
         from "$buildDir/libs"
@@ -42,8 +42,8 @@ project('gs-yarn-batch-restart-client') {
 project('gs-yarn-batch-restart-appmaster') {
     apply plugin: 'spring-boot'
     dependencies {
-        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC2")
-        runtime("org.springframework.boot:spring-boot-starter-batch:1.0.0.RELEASE")
+        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC4")
+        runtime("org.springframework.boot:spring-boot-starter-batch:1.0.2.RELEASE")
         runtime("org.hsqldb:hsqldb:2.3.1")
         runtime("commons-dbcp:commons-dbcp:1.2.2")
     }
@@ -52,8 +52,8 @@ project('gs-yarn-batch-restart-appmaster') {
 project('gs-yarn-batch-restart-container') {
     apply plugin: 'spring-boot'
     dependencies {
-        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC2")
-        runtime("org.springframework.boot:spring-boot-starter-batch:1.0.0.RELEASE")
+        compile("org.springframework.data:spring-yarn-batch:2.0.0.RC4")
+        runtime("org.springframework.boot:spring-boot-starter-batch:1.0.2.RELEASE")
     }
 }
 
@@ -63,7 +63,7 @@ project('gs-yarn-batch-restart-dist') {
         compile project(":gs-yarn-batch-restart-appmaster")
         compile project(":gs-yarn-batch-restart-container")
         testCompile("org.hsqldb:hsqldb:2.3.1")
-        testCompile("org.springframework.data:spring-yarn-boot-test:2.0.0.RC2")
+        testCompile("org.springframework.data:spring-yarn-boot-test:2.0.0.RC4")
         testCompile("org.hamcrest:hamcrest-core:1.2.1")
         testCompile("org.hamcrest:hamcrest-library:1.2.1")
     }
