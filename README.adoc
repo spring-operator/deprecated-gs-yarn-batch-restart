@@ -244,3 +244,4 @@ within a test itself.
 
 Congratulations! You've just developed a Spring YARN application! 
 
+include::https://raw.githubusercontent.com/spring-guides/getting-started-macros/master/footer.adoc[]
