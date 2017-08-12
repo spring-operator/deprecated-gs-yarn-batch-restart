@@ -30,7 +30,7 @@ projects: [spring-hadoop]
 :yarn_base_client: gs-yarn-batch-restart-client
 :yarn_base_dist: gs-yarn-batch-restart-dist
 This guide walks you through the process of executing a Spring Batch
-job and its partitioned steps on Hadoop YARN. We also add in a way of 
+job and its partitioned steps on Hadoop YARN. We also add in a way of
 simulating an error in a partitioned step to show the restart of a job.
 
 == What you'll build
@@ -132,7 +132,7 @@ include::complete/gs-yarn-batch-restart-appmaster/src/main/java/hello/appmaster/
 ----
 
 - We simply create two master steps named `master1` and `master2`.
-  Then we configure those steps to be partitioned on YARN and we set the grid 
+  Then we configure those steps to be partitioned on YARN and we set the grid
   size to two.
 
 Next we create a `application.yml` file for appmaster.
@@ -191,7 +191,7 @@ needed. We've bundled an instance of `HSQL` which is easy to start
 using in-memory mode. In a separate terminal window run the following:
 ```
 $ cd db/
-$ unzip hsqldb-2.3.1.zip 
+$ unzip hsqldb-2.3.1.zip
 $ cd hsqldb-2.3.1/hsqldb/data/
 $ java -cp ../lib/hsqldb.jar org.hsqldb.server.Server --database.0 mem:testdb --dbname.0 testdb --silent false --trace true
 ```
@@ -242,6 +242,16 @@ within a test itself.
 
 == Summary
 
-Congratulations! You've just developed a Spring YARN application! 
+Congratulations! You've just developed a Spring YARN application!
+
+== See Also
+
+The following guides may also be helpful:
+
+* https://spring.io/guides/gs/yarn-basic/[Simple YARN Application]
+* https://spring.io/guides/gs/yarn-testing/[Testing YARN Application]
+* https://spring.io/guides/gs/yarn-batch-processing/[Batch YARN Application]
+* https://spring.io/guides/gs/maven-yarn/[Building Spring YARN Projects with Maven]
+* https://spring.io/guides/gs/gradle-yarn/[Building Spring YARN Projects with Gradle]
 
 include::https://raw.githubusercontent.com/spring-guides/getting-started-macros/master/footer.adoc[]
