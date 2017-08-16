@@ -249,6 +249,7 @@ Congratulations! You've just developed a Spring YARN application!
 The following guides may also be helpful:
 
 * https://spring.io/guides/gs/yarn-basic/[Simple YARN Application]
+* https://spring.io/guides/gs/yarn-basic-single/[Simple Single Project YARN Application]
 * https://spring.io/guides/gs/yarn-testing/[Testing YARN Application]
 * https://spring.io/guides/gs/yarn-batch-processing/[Batch YARN Application]
 * https://spring.io/guides/gs/maven-yarn/[Building Spring YARN Projects with Maven]
