@@ -32,7 +32,7 @@ public class AppIT extends AbstractBootYarnClusterTests {
 		shell.touchz("/tmp/remoteStep1partition0");
 		shell.touchz("/tmp/remoteStep1partition1");
 
-		ApplicationInfo info1 = submitApplicationAndWait(ClientApplication.class, new String[0], 2, TimeUnit.MINUTES);
+		ApplicationInfo info1 = submitApplicationAndWait(ClientApplication.class, new String[0], 4, TimeUnit.MINUTES);
 		assertThat(info1.getYarnApplicationState(), is(YarnApplicationState.FINISHED));
 		assertLogs(ContainerLogUtils.queryContainerLogs(getYarnCluster(), info1.getApplicationId()), 10, 2, 2);
 
@@ -40,7 +40,7 @@ public class AppIT extends AbstractBootYarnClusterTests {
 		shell.touchz("/tmp/remoteStep2partition1");
 		shell.close();
 
-		ApplicationInfo info2 = submitApplicationAndWait(ClientApplication.class, new String[0], 2, TimeUnit.MINUTES);
+		ApplicationInfo info2 = submitApplicationAndWait(ClientApplication.class, new String[0], 4, TimeUnit.MINUTES);
 		assertThat(info2.getYarnApplicationState(), is(YarnApplicationState.FINISHED));
 		assertLogs(ContainerLogUtils.queryContainerLogs(getYarnCluster(), info2.getApplicationId()), 6, 2, 0);
 	}
